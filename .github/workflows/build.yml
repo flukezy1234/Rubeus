@@ -1,40 +1,39 @@
 name: Build Rubeus
 
 on:
-  push:
-    branches: [ master ]
   workflow_dispatch:
 
 jobs:
   build:
-    runs-on: windows-2019   # This image has better legacy .NET Framework support
+    runs-on: windows-latest
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Enable .NET Framework 3.5 (required for older projects)
+      - name: Setup .NET Framework Targeting Packs (Workaround)
         shell: powershell
         run: |
-          Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -All -NoRestart
+          # Install reference assemblies via NuGet (bypasses missing developer pack)
+          nuget install Microsoft.NETFramework.ReferenceAssemblies.net40 -Version 1.0.3 -OutputDirectory packages
 
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
 
-      - name: Restore NuGet packages
+      - name: Restore
         run: nuget restore Rubeus.sln
 
       - name: Setup MSBuild
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Release
-        run: msbuild Rubeus.sln /p:Configuration=Release /p:Platform="Any CPU" /m /verbosity:normal
+        run: msbuild Rubeus.sln /p:Configuration=Release /p:Platform="Any CPU" /m /verbosity:normal /p:TargetFrameworkVersion=v4.0
 
-      - name: Upload Artifact (Rubeus.exe)
+      - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: Rubeus-exe
           path: |
-            Rubeus/Rubeus/bin/Release/Rubeus.exe
-            Rubeus/bin/Release/Rubeus.exe
+            **/Rubeus.exe
+            **/bin/Release/Rubeus.exe
           if-no-files-found: warn
