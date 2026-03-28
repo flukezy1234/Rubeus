@@ -7,7 +7,7 @@ on:
 
 jobs:
   build:
-    runs-on: windows-2019   # More reliable for older .NET targets like Rubeus
+    runs-on: windows-2019
 
     steps:
       - name: Checkout code
@@ -23,11 +23,11 @@ jobs:
         uses: microsoft/setup-msbuild@v2
 
       - name: Build Release
-        run: msbuild Rubeus.sln /p:Configuration=Release /p:Platform="Any CPU" /m
+        run: msbuild Rubeus.sln /p:Configuration=Release /p:Platform="Any CPU" /m /verbosity:normal
 
       - name: Upload Artifact (Rubeus.exe)
         uses: actions/upload-artifact@v4
         with:
           name: Rubeus-exe
-          path: Rubeus/bin/Release/Rubeus.exe
+          path: Rubeus/Rubeus/bin/Release/Rubeus.exe
           if-no-files-found: error
