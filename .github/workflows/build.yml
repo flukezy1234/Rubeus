@@ -7,11 +7,16 @@ on:
 
 jobs:
   build:
-    runs-on: windows-latest   # Updated - this is the current reliable runner
+    runs-on: windows-2019   # This image has better legacy .NET Framework support
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Enable .NET Framework 3.5 (required for older projects)
+        shell: powershell
+        run: |
+          Enable-WindowsOptionalFeature -Online -FeatureName NetFx3 -All -NoRestart
 
       - name: Setup NuGet
         uses: nuget/setup-nuget@v2
@@ -32,4 +37,4 @@ jobs:
           path: |
             Rubeus/Rubeus/bin/Release/Rubeus.exe
             Rubeus/bin/Release/Rubeus.exe
-          if-no-files-found: warn   # Changed to warn so it doesn't fail the whole job if path is slightly off
+          if-no-files-found: warn
